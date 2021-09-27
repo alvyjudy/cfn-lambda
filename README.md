@@ -1,6 +1,9 @@
 
 # cfn-lambda
 
+# NOTE ON THIS FORK
+
+I made a modification to the `sendResponse` function such that it returns a promsie that only resolves when the HTTP request to the pre-signed S3 URL has completed. The current implementation would cause lambda to prematurely exit when processing long running request.
 
 ## Purpose
 
