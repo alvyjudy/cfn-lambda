@@ -306,27 +306,32 @@ function CfnLambdaFactory(resourceDefinition) {
         options.rejectUnauthorized = false
       }
 
-      var request = Https.request(options, function(response) {
-        console.log('STATUS: %s',response.statusCode)
-        console.log('HEADERS: %j', response.headers)
-        response.on('data', function() {
-          // noop
+      return new Promise((resolve, reject)=>{
+        var request = Https.request(options, function(response) {
+          console.log('STATUS: %s',response.statusCode)
+          console.log('HEADERS: %j', response.headers)
+          response.on('data', function() {
+            // noop
+          })
+          response.on('end', function() {
+            // Tell AWS Lambda that the function execution is done
+            context.done()
+            resolve('sendResponse completed')
+          })
         })
-        response.on('end', function() {
+  
+        request.on('error', function(error) {
+          console.log('sendResponse Error:\n', error)
           // Tell AWS Lambda that the function execution is done
           context.done()
+          reject('sendResposne Error')
         })
+  
+        // write data to request body
+        request.write(responseBody)
+        request.end()
       })
-
-      request.on('error', function(error) {
-        console.log('sendResponse Error:\n', error)
-        // Tell AWS Lambda that the function execution is done
-        context.done()
-      })
-
-      // write data to request body
-      request.write(responseBody)
-      request.end()
+      
     }
 
   }
